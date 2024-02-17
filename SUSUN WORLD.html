@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Susun World</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    .content {
+        text-align: center;
+    }
+    textarea {
+        border: 1px solid #000000;
+        width: 350px;
+        height: 150px; /* Increase height for multiple lists */
+        resize: none;
+        margin-bottom: 10px;
+    }
+    #resultBox {
+        margin-top: 20px;
+        border: 1px solid #000000;
+        padding: 10px;
+        width: 300px;
+        height: 200px;
+        overflow-y: auto;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #outputText {
+        margin-top: 20px;
+        border: 1px solid #000000;
+        padding: 10px;
+        width: 300px;
+        height: 200px;
+        overflow-y: auto;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .button-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 10px;
+    }
+    button {
+        background-color: #333;
+        color: #fff;
+        margin: 0 5px;
+        padding: 5px 10px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    footer {
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        padding: 0;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+</style>
+</head>
+<body>
+
+<div class="container" id="homePage">
+    <div class="content">
+        <h1>SUSUN WORLD</h1>
+        <P>RULES : </P>
+        <p>WAJIB GUNAKAN DELETE SYMBOL</p>
+        <p>UNTUK MENGHAPUS TANDA ""</p>
+        <p>AGAR BISA DI GUNAKAN DI SUSUN WORLD</p>
+        <h2>------------------------------</h2>
+        <button onclick="redirectToMain()">Susun World</button>
+        <div></div>
+        <button onclick="deleteSymbol()">Delete Symbol</button>
+    </div>
+</div>
+
+
+<div class="container" id="mainPageSusun" style="display: none;">
+    <div class="content">
+        <h2>INPUT LIST WORLD</h2>
+        <textarea id="worldInput" placeholder="Enter world lists separated by commas..."></textarea>
+        <h2>INPUT DOOR ID</h2>
+        <input type="text" id="doorInput" placeholder="Enter door...">
+        <div class="button-container">
+            <button onclick="addWorldAndDoor()">Add World & Door</button>
+            <button onclick="clearResults()">Clear Results</button>
+            <button onclick="downloadResults()">Download Results</button>
+        </div>
+        <div id="resultBox"></div>
+        <ul id="worldDoorList"></ul>
+    </div>
+</div>
+
+<div class="container" id="mainPageDelete" style="display: none;">
+    <div class="content">
+        <h2>World List To Delete Symbol""</h2>
+        <textarea id="inputText" placeholder="Enter world lists separated by commas..."></textarea>
+        <div class="button-container">
+            <button onclick="removeQuotes()">Hapus Tanda Kutip</button>
+            <button class="copy-button" onclick="copyToClipboard()">Copy</button>
+            <button class="copy-button" onclick="downloadTxtFile()">Download</button>
+        </div>
+        <h2>Hasil Delete Symbol ""</h2>
+        <div id="outputText"></div>
+        <div id="lines"></div>
+    </div>
+</div>
+
+<footer>
+    <p>Hak Cipta &copy; Zee 2024</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script>
+    /*ini untuk delet*/
+    function removeQuotes() {
+            var inputText = document.getElementById("inputText").value;
+            var outputText = inputText.replace(/"/g, ''); // Menghapus semua tanda kutip (")
+            var outputBox = document.getElementById("outputText");
+
+            outputBox.innerText = outputText;
+            outputBox.focus();
+            outputBox.select();
+
+            // Hitung jumlah baris
+            var lineCount = inputText.split(/\r\n|\r|\n/).length;
+
+            // Tampilkan garis
+            var lines = '';
+            for (var i = 0; i < lineCount; i++) {
+                lines += "<div class='line'></div>";
+            }
+            document.getElementById("lines").innerHTML = lines;
+        }
+
+        function copyToClipboard() {
+            var outputText = document.getElementById("outputText").innerText;
+            navigator.clipboard.writeText(outputText)
+                .then(() => {
+                    alert("Teks berhasil disalin ke clipboard!");
+                })
+                .catch(err => {
+                    console.error('Gagal menyalin teks: ', err);
+                });
+        }
+
+        function downloadTxtFile() {
+            var outputText = document.getElementById("outputText").innerText;
+            var blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+            saveAs(blob, "hasil_tanpa_tanda_kutip.txt");
+        }
+
+    /*ini untuk susun */
+    function redirectToMain() {
+        document.getElementById("homePage").style.display = "none";
+        document.getElementById("mainPageSusun").style.display = "block";
+    }
+
+    function deleteSymbol() {
+        document.getElementById("homePage").style.display = "none";
+        document.getElementById("mainPageDelete").style.display = "block";
+    }
+
+    function addWorldAndDoor() {
+        var worldInput = document.getElementById("worldInput").value.trim();
+        var doorInput = document.getElementById("doorInput").value.trim();
+
+        if (worldInput && doorInput) {
+            var worldDoorList = document.getElementById("worldDoorList");
+            var resultBox = document.getElementById("resultBox");
+            var worldNames = worldInput.split(",");
+            worldNames.forEach(function(worldItem) {
+                var trimmedWorld = worldItem.trim();
+                if (trimmedWorld) {
+                    var resultItem = document.createElement("div");
+                    resultItem.textContent = '"' + trimmedWorld + '|' + doorInput + '"' + ',';
+                    resultBox.appendChild(resultItem);
+                }
+            });
+
+            document.getElementById("worldInput").value = "";
+            document.getElementById("doorInput").value = "";
+        } else {
+            alert("Both World and Door inputs must be filled!");
+        }
+    }
+
+    function clearResults() {
+        var resultBox = document.getElementById("resultBox");
+        resultBox.innerHTML = "";
+    }
+
+    function downloadResults() {
+        var resultText = "";
+        var resultBox = document.getElementById("resultBox").childNodes;
+        resultBox.forEach(function(item) {
+            resultText += item.textContent;
+        });
+
+        var blob = new Blob([resultText], { type: "text/plain" });
+        var link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "world_door_results.txt";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Enter") {
+            addWorldAndDoor();
+        }
+    });
+</script>
+
+</body>
+</html>
